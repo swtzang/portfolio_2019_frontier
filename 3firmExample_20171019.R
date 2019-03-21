@@ -3,7 +3,7 @@
 # 3-asset example
 # 
 rm(list=ls())
-setwd("D:/亞洲大學上課資料/Portfolio management 2017 Fall")
+#setwd("D:/亞洲大學上課資料/Portfolio management 2017 Fall")
 #
 #=======================================
 # Step 1: Import data from excel
@@ -17,7 +17,7 @@ setwd("D:/亞洲大學上課資料/Portfolio management 2017 Fall")
 # Delete % from data and convert into numeric
 #==========================================================================================================
 # After conversion, we save the file as 3firmExample_data3.csv
-setwd("~/portfolio_2017_Fall")
+# setwd("~/portfolio_2017_Fall")
 firm_data1 = read.csv('3firmExample_data3.csv')
 str(firm_data1)
 firm_data1$date
