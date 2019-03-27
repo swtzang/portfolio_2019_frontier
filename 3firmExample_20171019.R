@@ -377,7 +377,7 @@ constraints = add.constraints(diag(n), type='>=', b=0, constraints)
 constraints = add.constraints(diag(n), type='<=', b=1, constraints)
 # SUM x.i = 1
 constraints = add.constraints(rep(1, n), 1, type = '=', constraints)
-
+ 
 # create efficient frontier
 ifelse(!require(corpcor), install.packages("corpcor"), library(corpcor))
 ifelse(!require(lpSolve), install.packages("lpSolve"), library(lpSolve))
