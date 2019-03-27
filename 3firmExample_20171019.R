@@ -38,11 +38,31 @@ rbind(apply(firm.data1, 2, summary),
 # IF you know the ticker of stocks, then you can 
 # download directly from yahoo finance
 #=====================================================================================
-#library(quantmod)
-#tickers<-c("JWN", "SBUX", "MSFT")
-#getSymbols(tickers, from = '2010-12-31', to = '2016-12-31', auto.assign = TRUE)
-
-
+library(plyr)
+library(quantmod)
+tickers<-c("JWN", "SBUX", "MSFT")
+data.env<-new.env()
+# here we use l_ply so that we don't double save the data
+# getSymbols() does this already so we just want to be memory efficient
+# go through every stock and try to use getSymbols()
+l_ply(tickers, function(sym) try(getSymbols(sym, env=data.env), silent=T))
+# now we only want the stocks that got stored from getSymbols()
+# basically we drop all "bad" tickers
+stocks <- tickers[tickers %in% ls(data.env)]
+# now we just loop through and merge our good stocks
+# if you prefer to use an lapply version here, that is also fine
+# since now we are just collecting all the good stock xts() objects
+data <- xts()
+# i=1
+for(i in seq_along(stocks)) {
+  symbol <- stocks[i]
+  data <- merge(data, Ad(get(symbol, envir=data.env)))
+}
+head(data)
+str(data)
+# convert POSIXct into date series
+data<-xts(coredata(data), order.by = as.Date(index(data), tz=""))
+head(data)
 #=================================
 # Minimum variance portfolio
 #=================================
@@ -359,18 +379,16 @@ constraints = add.constraints(diag(n), type='<=', b=1, constraints)
 constraints = add.constraints(rep(1, n), 1, type = '=', constraints)
 
 # create efficient frontier
+ifelse(!require(corpcor), install.packages("corpcor"), library(corpcor))
+ifelse(!require(lpSolve), install.packages("lpSolve"), library(lpSolve))
 ef = portopt(ia, constraints, 50, 'Efficient Frontier') 
-
-
 #====================================================
 # David Ruppert's example in his textbook
 #===================================================
-install.packages("Ecdat",dependencies=TRUE,repos="http://ftp.yzu.edu.tw/CRAN/")
-install.packages("Ecfun", dependencies = TRUE, repos="http://ftp.yzu.edu.tw/CRAN/")
-library(Ecfun)
-library(Ecdat)
-library(quadprog)
-
+ifelse(!require(Ecdat), install.packages("Ecdat"), library(Ecdat))
+ifelse(!require(Ecfun), install.packages("Ecfun"), library(Ecfun))
+ifelse(!require(quadprog), install.packages("quadprog"), library(quadprog))
+#
 data(CRSPday)
 #daily observations from 1969-1-03 to 1998-12-31
 #number of observations : 2528
@@ -378,10 +396,10 @@ data(CRSPday)
 #ibm the return for IBM, Permno 12490
 #mobil the return for Mobil Corporation, Permno 15966
 #crsp the return for the CRSP value-weighted index, including dividends
-
 class(CRSPday)
 CRSP.df = as.data.frame(CRSPday)
-
+head(CRSP.df)
+#
 R = 100*CRSP.df[,4:6]
 mean_vect = apply(R,2,mean)
 cov_mat = cov(R)
