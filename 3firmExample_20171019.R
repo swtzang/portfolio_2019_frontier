@@ -63,6 +63,7 @@ str(data)
 # convert POSIXct into date series
 data<-xts(coredata(data), order.by = as.Date(index(data), tz=""))
 head(data)
+tail(data)
 #=================================
 # Minimum variance portfolio
 #=================================
@@ -160,7 +161,7 @@ chart.CumReturns(ret.ts, legend.loc = 'topleft', main = '')
 
 plot(portfolioFrontier(ret.ts))
 
-1#To mimic what we have implemented in the preceding code, let us render the
+#To mimic what we have implemented in the preceding code, let us render the
 #frontier plot of short sale constraints
 Spec = portfolioSpec()
 setSolver(Spec) = "solveRshortExact"
@@ -303,7 +304,8 @@ graphics.off()
 Amat1 = cbind(rep(1,3),mu, diag(1,nrow=3))  # set the constraints matrix
 t(Amat1)
 # muP = seq(.01,.08,length=300)  # set of 300 possible target values 
-# When short sales are prohibited, the target expected return on the portfolio must lie between the smallest 
+# When short sales are prohibited, the target expected return on the 
+# portfolio must lie between the smallest 
 # and largest expected returns on the stocks. 
 muP1 = seq(min(mu)+.0001,max(mu)-.0001,length=300)
 
@@ -320,7 +322,8 @@ for (i in 1:length(muP1))  # find the optimal portfolios for each target expecte
   weights1[i,] = result$solution
 }
 
-postscript("3firmExample_noshort.ps",width=6,height=5)  
+#postscript("3firmExample_noshort.ps",width=6,height=5)  
+pdf("3firmExample_noshort.pdf",width=6,height=5)  
 plot(sdP1,muP1,type="l",xlim=c(0,0.25),ylim=c(0,0.08),lty=1)  #  plot 
 #the efficient frontier (and inefficient frontier)
 par(new=TRUE)
@@ -377,11 +380,13 @@ constraints = add.constraints(diag(n), type='>=', b=0, constraints)
 constraints = add.constraints(diag(n), type='<=', b=1, constraints)
 # SUM x.i = 1
 constraints = add.constraints(rep(1, n), 1, type = '=', constraints)
- 
+#
+weight <- min.risk.portfolio(ia, constraints)
 # create efficient frontier
 ifelse(!require(corpcor), install.packages("corpcor"), library(corpcor))
 ifelse(!require(lpSolve), install.packages("lpSolve"), library(lpSolve))
 ef = portopt(ia, constraints, 50, 'Efficient Frontier') 
+ef
 #====================================================
 # David Ruppert's example in his textbook
 #===================================================
@@ -444,8 +449,17 @@ text(sd_vect[2],mean_vect[2],"IBM",cex=1, pos=4)
 text(sd_vect[3],mean_vect[3],"Mobil",cex=1, pos=4)
 graphics.off()
 
-
-
+#----------------------------------------------
+# Homework:
+# https://rpubs.com/JanpuHou/258620
+# create efficient frontier plots
+#-------------------------------------------
+# 1. Download any three stock prices from yahoo finance from 
+#   2007-2018 and compute daily, weekly and monthly returns.
+# 2. Compute monthly returns and standard deviation of 
+#    the MVP starting 2010 using in-sample 36 monthly returns.
+# Run your codings and results in Rmarkdown and 
+# upload its url to moodle. 
 
 
 
