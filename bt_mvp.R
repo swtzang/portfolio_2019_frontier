@@ -24,11 +24,14 @@ data <- new.env()
 getSymbols(tickers, src = 'yahoo', from = '1980-01-01', env = data, auto.assign = T)
 for(i in ls(data)) data[[i]] = adjustOHLC(data[[i]], use.Adjusted=T)
 
+names(data)
+
 data.weekly <- new.env()
 for(i in tickers) data.weekly[[i]] = to.weekly(data[[i]], indexAt='endof')
 
 bt.prep(data, align='remove.na', dates='1990::2018')
-bt.prep(data.weekly, align='remove.na', dates='1990::2011')
+bt.prep(data.weekly, align='remove.na', dates='1990::2018')
+names(data)
 
 #*****************************************************************
 # Code Strategies
@@ -45,9 +48,11 @@ week.ends = week.ends[week.ends > 0]
 data$weight[] = NA
 data$weight[week.ends,] = ntop(prices[week.ends,], n)       
 
-capital = 100000
-data$weight[] = (capital / prices) * data$weight
-equal.weight = bt.run(data, type='share')
+#capital = 100000
+#data$weight[] = (capital / prices) * data$weight
+equal.weight = bt.run(data)
+names(equal.weight)
+head(equal.weight$equity)
 
 
 #*****************************************************************
@@ -69,18 +74,23 @@ for( i in week.ends[week.ends >= (63 + 1)] ) {
   
   # create historical input assumptions
   ia = create.historical.ia(hist, 252)
-  s0 = apply(coredata(hist),2,sd)     
-  ia$cov = cor(coredata(hist), use='complete.obs',method='pearson') * (s0 %*% t(s0))
+  #s0 = apply(coredata(hist),2,sd)     
+  #ia$cov = cor(coredata(hist), use='complete.obs',method='pearson') * (s0 %*% t(s0))
   
   weight[i,] = min.risk.portfolio(ia, constraints)
 }
 
+tail(weight,10)
+
 # Minimum Variance
 data$weight[] = weight      
-capital = 100000
-data$weight[] = (capital / prices) * data$weight
-min.var.daily = bt.run(data, type='share', capital=capital)
-
+#capital = 100000
+#data$weight[] = (capital / prices) * data$weight
+min.var.daily = bt.run(data)
+names(min.var.daily)
+min.var.daily$equity
+min.var.daily$ret
+min.var.daily$weight
 #
 #*****************************************************************
 # Code Strategies: Weekly
@@ -89,7 +99,7 @@ retw = data.weekly$prices / mlag(data.weekly$prices) - 1
 weightw = coredata(prices)
 weightw[] = NA
 
-i=1793
+week.ends<-week.ends[-length(week.ends)]
 for( i in week.ends[week.ends >= (63 + 1)] ) {   
   # map
   j = which(index(ret[i,]) == index(retw))
@@ -113,7 +123,16 @@ min.var.weekly = bt.run(data, type='share', capital=capital)
 #*****************************************************************
 # Create Report
 #****************************************************************** 
-plotbt.custom.report.part1(min.var.weekly, min.var.daily, equal.weight)
+plotbt.custom.report.part1(min.var.daily, equal.weight)
+#
+models<-list(min.var.daily, equal.weight)
+#
+strategy.performance.snapshoot(models, T)
+strategy.performance.snapshoot(models, control=list(comparison=T), 
+                               sort.performance=T)
+plotbt.strategy.sidebyside(models, return.table=T)
+plotbt.strategy.sidebyside(min.var.daily, return.table=T)
+
 
 # plot Daily and Weekly transition maps
 layout(1:2)
