@@ -123,15 +123,17 @@ min.var.weekly = bt.run(data, type='share', capital=capital)
 #*****************************************************************
 # Create Report
 #****************************************************************** 
-plotbt.custom.report.part1(min.var.daily, equal.weight)
+plotbt.custom.report.part1(min.var.daily, min.var.weekly, equal.weight)
 #
-models<-list(min.var.daily, equal.weight)
+models<-list("Min.var.daily" = min.var.daily, 
+             "Min.var.weekly" = min.var.weekly, 
+             "Equal.weight" = equal.weight)
 #
 strategy.performance.snapshoot(models, T)
 strategy.performance.snapshoot(models, control=list(comparison=T), 
                                sort.performance=T)
 plotbt.strategy.sidebyside(models, return.table=T)
-plotbt.strategy.sidebyside(min.var.daily, return.table=T)
+#plotbt.strategy.sidebyside(min.var.daily, return.table=T)
 
 
 # plot Daily and Weekly transition maps
