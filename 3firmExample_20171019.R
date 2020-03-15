@@ -145,24 +145,25 @@ frontier(return)
 #===============================================
 # Use package fPortfolio to plot frontier
 #===============================================
-library(timeSeries)
-library(PerformanceAnalytics)
+library(pacman)
+p_load(timeSeries, PerformanceAnalytics, fPortfolio)
+# library(timeSeries)
+# library(PerformanceAnalytics)
 #install.packages("rugarch", dependencies=TRUE)
 #install.packages("PerformanceAnalytics", dependencies=TRUE)
 #install.packages("fAssets", dependencies=TRUE)
 #install.packages("fPortfolio",dependencies=TRUE)
-
-library(fPortfolio)
+#library(fPortfolio)
 return = firm_data1[,2:4]
 # convert data to timeseries
 ret.ts<- timeSeries(return, date1)
 chart.CumReturns(ret.ts, legend.loc = 'topleft', main = '')
 
-
 plot(portfolioFrontier(ret.ts))
 
 #To mimic what we have implemented in the preceding code, let us render the
 #frontier plot of short sale constraints
+
 Spec = portfolioSpec()
 setSolver(Spec) = "solveRshortExact"
 setTargetReturn(Spec) = mean(colMeans(ret.ts))## or set your own target return
@@ -248,6 +249,20 @@ barplot(height = weights, names.arg = names,
           horiz = TRUE, las = 1, col = col)
 title(main = "Weights of Global Min Variance Portfolio",
         xlab = "Weights %")
+#==========================================
+# package: IntroCompFinR
+# Introduction to Computational Finance in R 
+# Author: Eric Zivot
+#==========================================
+install.packages("IntroCompFinR", repos="http://R-Forge.R-project.org")
+library(IntroCompFinR)
+# tangency.portfolio(er, cov.mat, risk.free, shorts = TRUE)
+tangency.portfolio(colMeans(ret.ts), Sigma, risk.free = 0, shorts = TRUE)
+# efficient.frontier(er, cov.mat, nport = 20, alpha.min = -0.5,
+# alpha.max = 1.5, shorts = TRUE)
+efficient.frontier(colMeans(ret.ts), Sigma, nport = 20, alpha.min = -0.5,
+                   alpha.max = 1.5, shorts = TRUE)
+
 
 #=================================
 # quadratic programming
