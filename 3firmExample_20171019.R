@@ -100,8 +100,9 @@ std.out.annual<-std.out*sqrt(12)
 std.out.annual
 #====================================================================================================
 # Or write your own function to find min var for a  specified return mu;
-# Reference: Introduction to R for Quantitative Finance: Chapter 2, p31
+# Reference: Introduction to R for Quantitative Finance: Chapter 2, p31, Packt publishing, 2013.
 # Solve a diverse range of problems with R, one of the most powerful tools for quantitative finance
+# min {w'Qw conditional on w1 = 1, wr = mu}
 #====================================================================================================
 return = firm_data1[,2:4]
 #specified portfolio return: mu
@@ -111,6 +112,7 @@ minvariance <- function(return, mu) {
   #return <- log(tail(assets, -1) / head(assets, -1))
   Ax <- rbind(2*cov(return), colMeans(return), rep(1, ncol(return)))
   Ax <- cbind(Ax, rbind(t(tail(Ax, 2)), matrix(0, 2, 2)))
+  # Two rows and two columns are added to the covariance matrix,
   b0 <- c(rep(0, ncol(return)), mu, 1)
   zx<-solve(Ax, b0)
   weight<-zx[1:ncol(return)]
@@ -119,7 +121,7 @@ minvariance <- function(return, mu) {
   list(weight=weight, rtn=ret.out, sd=std.out)
 }
 
-minvariance(return, mu)
+minvariance(return, 0.001)
 #======================================================
 # Create frontier function to plot efficient frontier
 #======================================================
@@ -132,10 +134,11 @@ frontier <- function(return){
   Ax <- cbind(Ax, rbind(t(tail(Ax, 2)), matrix(0, 2, 2)))
   r <- colMeans(return)
   rbase <- seq(min(r), max(r), length = 100)
+  # x <- rbase[1]
   s <- sapply(rbase, function(x) {
-    b0 <- c(rep(0, ncol(return)), x, 1)
-    y <- head(solve(Ax, b0), n)
-    sqrt(y%*%Q%*%y)
+       b0 <- c(rep(0, ncol(return)), x, 1)
+       y <- head(solve(Ax, b0), n)
+       sqrt(y%*%Q%*%y)
   })
   plot(s, rbase, xlab = 'Std', ylab = 'Return')
 }
@@ -253,14 +256,16 @@ title(main = "Weights of Global Min Variance Portfolio",
 # package: IntroCompFinR
 # Introduction to Computational Finance in R 
 # Author: Eric Zivot
+# ECON 424/AMATH 462: Introduction to Computational Finance and Financial Econometrics
+# https://faculty.washington.edu/ezivot/econ424/R_hints.htm
 #==========================================
 install.packages("IntroCompFinR", repos="http://R-Forge.R-project.org")
 library(IntroCompFinR)
 # tangency.portfolio(er, cov.mat, risk.free, shorts = TRUE)
-tangency.portfolio(colMeans(ret.ts), Sigma, risk.free = 0, shorts = TRUE)
+tangency.portfolio(colMeans(return), Sigma, risk.free = 0, shorts = TRUE)
 # efficient.frontier(er, cov.mat, nport = 20, alpha.min = -0.5,
 # alpha.max = 1.5, shorts = TRUE)
-efficient.frontier(colMeans(ret.ts), Sigma, nport = 20, alpha.min = -0.5,
+efficient.frontier(colMeans(return), Sigma, nport = 20, alpha.min = -0.5,
                    alpha.max = 1.5, shorts = TRUE)
 
 
