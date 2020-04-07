@@ -407,6 +407,8 @@ ifelse(!require(corpcor), install.packages("corpcor"), library(corpcor))
 ifelse(!require(lpSolve), install.packages("lpSolve"), library(lpSolve))
 ef = portopt(ia, constraints, 50, 'Efficient Frontier') 
 ef
+names(ef)
+plot(ef$risk, ef$return)
 #====================================================
 # David Ruppert's example in his textbook
 #===================================================
