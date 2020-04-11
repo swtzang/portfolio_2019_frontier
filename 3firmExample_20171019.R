@@ -268,7 +268,7 @@ tangency.portfolio(colMeans(return), Sigma, risk.free = 0, shorts = TRUE)
 efficient.frontier(colMeans(return), Sigma, nport = 20, alpha.min = -0.5,
                    alpha.max = 1.5, shorts = TRUE)
 
-
+globalMin.portfolio(colMeans(return), Sigma)
 #=================================
 # quadratic programming
 #=================================
